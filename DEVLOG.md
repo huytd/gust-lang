@@ -188,8 +188,7 @@ For the expression that ends with an identifier, like:
 a + b - c
 ```
 
-The last character would be `'c'`, and there is no characters come after that, the `peek()` call return a `None` value, the scanning
-function would not go anyfurther:
+The last character would be `'c'`, and there is no characters come after that, the `peek()` call return a `None` value, the scanning function would not go any further:
 
 ```rust
 if let Some((start, c)) = self.chars.next() {
@@ -197,8 +196,7 @@ if let Some((start, c)) = self.chars.next() {
         // ^ it's None here, so the code stop
 ```
 
-To fix this, we can set the default value for the `peek()` as a null byte, and there should be no
-changes in the scanning algorithm:
+To fix this, we can set the default value for the `peek()` as a null byte, and there should be no changes in the scanning algorithm:
 
 ```rust
 if let Some((start, c)) = self.chars.next() {
