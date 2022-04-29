@@ -2,8 +2,8 @@ use std::{
     iter::{Enumerate, Peekable},
     str::Chars,
 };
-
 use super::token::Token;
+use super::string::fetch_string_slice;
 
 pub struct Lexer<'a> {
     chars: Peekable<Enumerate<Chars<'a>>>,
@@ -96,7 +96,25 @@ impl<'a> Iterator for Lexer<'a> {
                     } else {
                         None
                     }
-                }
+                },
+                quote @ ('"' | '\'') => {
+                    let mut end = start;
+                    while let Some((next_end, c_next)) = self.chars.next() {
+                        if c_next == quote {
+                            end = next_end;
+                            break;
+                        }
+                    }
+                    if end != start {
+                        if let Some(content) = fetch_string_slice(self.source, start, end) {
+                            return Some(Token::String(content));
+                        } else {
+                            return None;
+                        }
+                    } else {
+                        return Some(Token::Invalid);
+                    }
+                },
                 _ => {
                     if c.is_alphabetic() {
                         let mut end = start;
@@ -108,7 +126,7 @@ impl<'a> Iterator for Lexer<'a> {
                                 break;
                             }
                         }
-                        let word = &self.source[start..=end];
+                        let word = fetch_string_slice(self.source, start, end).unwrap_or("");
                         match word {
                             "if" => return Some(Token::If),
                             "else" => return Some(Token::Else),
@@ -324,6 +342,72 @@ mod tests {
             Token::Identifier("b"),
             Token::EOL,
             Token::RightBracket
+        ])
+    }
+
+    #[test]
+    fn lexer_string_test() {
+        let lexer = Lexer::new(r#""hello world""#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![Token::String(r#""hello world""#)])
+    }
+
+    #[test]
+    fn lexer_single_quoted_string_test() {
+        let lexer = Lexer::new(r#"'hello world'"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![Token::String("'hello world'")])
+    }
+
+    #[test]
+    fn lexer_invalid_string_test() {
+        let lexer = Lexer::new(r#""hello world"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![Token::Invalid])
+    }
+
+    #[test]
+    fn lexer_empty_string_test() {
+        let lexer = Lexer::new(r#""""#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![Token::String(r#""""#)])
+    }
+
+    #[test]
+    fn lexer_empty_single_quoted_string_test() {
+        let lexer = Lexer::new(r#"''"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![Token::String(r#"''"#)])
+    }
+
+    #[test]
+    fn lexer_unicode_string_test() {
+        let lexer = Lexer::new(r#"'Im a rocket 🚀'"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![Token::String(r#"'Im a rocket 🚀'"#)])
+    }
+
+    #[test]
+    fn lexer_string_variable_definition_test() {
+        let lexer = Lexer::new(r#"let s = "Tiếng Việt""#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::Let,
+            Token::Identifier("s"),
+            Token::Equal,
+            Token::String(r#""Tiếng Việt""#)
+        ])
+    }
+
+    #[test]
+    fn lexer_print_statement_with_string_test() {
+        let lexer = Lexer::new(r#"print("Xin chào!!!")"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::Print,
+            Token::LeftParen,
+            Token::String(r#""Xin chào!!!""#),
+            Token::RightParen
         ])
     }
 }

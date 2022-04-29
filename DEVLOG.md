@@ -1,3 +1,77 @@
+#04.29.2022 - Add String support to the Lexer
+
+With the unit tests up and running, it's time to start expanding the Lexer: Adding String support.
+
+A string is a sequence of any characters that stay between a pair of quotation characters. Just like in JavaScript, either a double quote or a single quote can be used to define a string.
+
+```javascript
+"this is a string"
+'this is also a string'
+```
+
+So, the first thing to do is to add a couple of tests, both the valid and invalid strings:
+
+```rust
+#[test]
+fn lexer_string_test(){
+    let lexer = new Lexer::new(r#""hello world""#);
+    let actual = lexer.collect::<Vec<Token>>();
+    assert!(actual == vec![
+        Token::String(r#""hello world""#)
+    ])
+}
+```
+
+An invalid string should return a `Token::Invalid` token:
+
+```rust
+#[test]
+fn lexer_invalid_string_test(){
+    let lexer = new Lexer::new("'hello);
+    let actual = lexer.collect::<Vec<Token>>();
+    assert!(actual == vec![Token::Invalid])
+}
+```
+
+The algorithm to scan for a string is pretty much like what we did for all the other multiple-char tokens:
+
+1. Start with a quotation mark
+2. If the next character is not a matching quotation mark, consume that character
+3. If we found the matching quotation mark, record the position, return a `Token::String` token with the string slice from the start to the current position
+
+Initially, I implemented the scanner like this:
+
+```rust
+let token = match c {
+    ...
+    quote @ ('"' | '\'') => {
+        let mut end = start;
+        while let Some((next_end, next_char)) = self.chars.next() {
+            if quote == next_char {
+                end = next_end; break;
+            }
+        }
+        let content = &self.source[start..=end];
+        return Some(Token::String(content));
+    }
+}
+```
+
+This implementation worked fine until I decided to test with some Unicode strings. The Lexer crashed with the **"byte index is not a char boundary"** message.
+
+The reason is, that we're getting the string content slice using the byte indices `&self.source[start..=end]`, but both the `start` and `end` indices are the character index that came from `self.chars` iterator.
+
+So, what we need to do here is access the character list of `self.source` and return a slice from the range of `start..=end`. To do this, we can use `char_indices()` iterator. There is an `utf8_slice` crate that does this, and the implementation is available at: [crate `utf8_slice`: src/utf8_slice/lib.rs.html#52-70]()https://docs.rs/utf8_slice/latest/src/utf8_slice/lib.rs.html#52-70).
+
+All we have to do when fetching the string content is:
+
+```rust
+let content = fetch_string_slice(self.source, start, end);
+return Some(Token::String(content));
+```
+
+Actually, with this implementation, I can make Gust supports Unicode identifiers (variable names, function names,...) as well!
+
 # 04.29.2022 - A Working Lexer
 
 Finally got some time to actually initialize some code for the compiler, I guess
