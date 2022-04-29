@@ -101,3 +101,32 @@ if c_next.is_digit(10) || c_next == &'_' || c_next == &'.' {
     ...
 }
 ```
+
+---
+
+**Update (10:25 AM):**
+
+Actually, there was an error with the above code and I only spot it after adding some tests.
+
+For the expression that ends with an identifier, like:
+
+```
+a + b - c
+```
+
+The last character would be `'c'`, and there is no characters come after that, the `peek()` call return a `None` value, the scanning
+function would not go anyfurther:
+
+```rust
+if let Some((start, c)) = self.chars.next() {
+    if let Some((_, c_next)) = self.chars.peek() {
+        // ^ it's None here, so the code stop
+```
+
+To fix this, we can set the default value for the `peek()` as a null byte, and there should be no
+changes in the scanning algorithm:
+
+```rust
+if let Some((start, c)) = self.chars.next() {
+    let (_, c_next) = self.chars.peek().unwrap_or(&(0, '\0'));
+```
