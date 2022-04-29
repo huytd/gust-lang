@@ -147,3 +147,94 @@ impl<'a> Iterator for Lexer<'a> {
         None
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Lexer, Token};
+    #[test]
+    fn lexer_variable_declaration_test() {
+        let lexer = Lexer::new("let x = 10");
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::Let,
+            Token::Identifier("x"),
+            Token::Equal,
+            Token::Number("10")
+        ])
+    }
+
+    #[test]
+    fn lexer_variable_declaration_multiline_test() {
+        let lexer = Lexer::new(r#"let x = 10
+            let y = x
+        "#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::Let,
+            Token::Identifier("x"),
+            Token::Equal,
+            Token::Number("10"),
+            Token::EOL,
+            Token::Let,
+            Token::Identifier("y"),
+            Token::Equal,
+            Token::Identifier("x"),
+            Token::EOL
+        ])
+    }
+
+    #[test]
+    fn lexer_if_statement_test() {
+        let lexer = Lexer::new(r#"if a != b {
+            print(a)
+        }"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::If,
+            Token::Identifier("a"),
+            Token::BangEqual,
+            Token::Identifier("b"),
+            Token::LeftBracket,
+            Token::EOL,
+            Token::Print,
+            Token::LeftParen,
+            Token::Identifier("a"),
+            Token::RightParen,
+            Token::EOL,
+            Token::RightBracket
+        ])
+    }
+
+    #[test]
+    fn lexer_if_statement_with_else_test() {
+        let lexer = Lexer::new(r#"if a != b {
+            print(a)
+        } else {
+            print(b)
+        }"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::If,
+            Token::Identifier("a"),
+            Token::BangEqual,
+            Token::Identifier("b"),
+            Token::LeftBracket,
+            Token::EOL,
+            Token::Print,
+            Token::LeftParen,
+            Token::Identifier("a"),
+            Token::RightParen,
+            Token::EOL,
+            Token::RightBracket,
+            Token::Else,
+            Token::LeftBracket,
+            Token::EOL,
+            Token::Print,
+            Token::LeftParen,
+            Token::Identifier("b"),
+            Token::RightParen,
+            Token::EOL,
+            Token::RightBracket
+        ])
+    }
+}
