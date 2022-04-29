@@ -61,7 +61,7 @@ This implementation worked fine until I decided to test with some Unicode string
 
 The reason is, that we're getting the string content slice using the byte indices `&self.source[start..=end]`, but both the `start` and `end` indices are the character index that came from `self.chars` iterator.
 
-So, what we need to do here is access the character list of `self.source` and return a slice from the range of `start..=end`. To do this, we can use `char_indices()` iterator. There is an `utf8_slice` crate that does this, and the implementation is available at: [crate `utf8_slice`: src/utf8_slice/lib.rs.html#52-70]()https://docs.rs/utf8_slice/latest/src/utf8_slice/lib.rs.html#52-70).
+So, what we need to do here is access the character list of `self.source` and return a slice from the range of `start..=end`. To do this, we can use `char_indices()` iterator. There is an `utf8_slice` crate that does this, and the implementation is available at: [crate `utf8_slice`: src/utf8_slice/lib.rs.html#52-70](https://docs.rs/utf8_slice/latest/src/utf8_slice/lib.rs.html#52-70).
 
 All we have to do when fetching the string content is:
 
