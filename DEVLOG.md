@@ -1,4 +1,4 @@
-#04.29.2022 - Add String support to the Lexer
+# 04.29.2022 - Add String support to the Lexer
 
 With the unit tests up and running, it's time to start expanding the Lexer: Adding String support.
 
