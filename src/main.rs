@@ -9,15 +9,13 @@ use compiler::lexer::Lexer;
 
 fn main() {
     let source = r#"
-    {}[]
-    != < > <= >= = == ()
     let x = 10
-        let y = x
-        let z = x + 5
-        if y >= x && z != 10 {
-            let hello = 100
-        }
-        let long_name = true"#;
+    let y = x
+    let z = x + 5
+    if y >= x && z != 10 {
+        let hello = 100
+    }
+    let long_name = true"#;
     let mut lexer = Lexer::new(source);
     loop {
         let token = lexer.next();
