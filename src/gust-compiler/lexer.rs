@@ -142,7 +142,7 @@ impl<'a> Iterator for Lexer<'a> {
                             _ => return Some(Token::Identifier(word)),
                         }
                     }
-                    if c.is_numeric() {
+                    if c.is_digit(10) {
                         let mut end = start;
                         while let Some((next_end, c_next)) = self.chars.peek() {
                             if c_next.is_digit(10) || c_next == &'_' || c_next == &'.' {
@@ -317,6 +317,16 @@ mod tests {
         let actual = lexer.collect::<Vec<Token>>();
         assert!(actual == vec![
             Token::Number("3.14159265359"),
+        ])
+    }
+
+    #[test]
+    fn lexer_negative_number_test() {
+        let lexer = Lexer::new(r#"-2412"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::Minus,
+            Token::Number("2412"),
         ])
     }
 
