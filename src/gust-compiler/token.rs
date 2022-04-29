@@ -1,14 +1,50 @@
-pub const KEYWORDS: [&str; 5] = ["let", "if", "for", "while", "fn"];
-pub const DELIMIERS: [char; 8] = ['{', '}', '[', ']', '(', ')', '"', '\''];
-
 #[derive(Debug, PartialEq)]
-pub enum Token {
+pub enum Token<'a> {
     Invalid,
     EOL,
-    Assignment,
-    Keyword(String),
-    Operator(String),
-    Number(i32),
-    Identifier(String),
-    Delimiter(char)
+
+    // Single char tokens
+    LeftBracket,
+    RightBracket,
+    LeftParen,
+    RightParen,
+    LeftSquareBracket,
+    RightSquareBracket,
+    Comma,
+    Dot,
+    Minus,
+    Plus,
+    Colon,
+    Slash,
+    Star,
+
+    // Conditional tokens
+    Bang,
+    BangEqual,
+    Equal,
+    EqualEqual,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
+
+    // Keywords
+    And,
+    Or,
+    If,
+    Else,
+    Func,
+    For,
+    While,
+    Let,
+    Nil,
+    Return,
+    Print,
+    True,
+    False,
+
+    // Others
+    Identifier(&'a str),
+    String(&'a str),
+    Number(&'a str),
 }
