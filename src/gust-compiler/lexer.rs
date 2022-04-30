@@ -420,4 +420,16 @@ mod tests {
             Token::RightParen
         ])
     }
+
+    #[test]
+    fn lexer_unicode_identifier_test() {
+        let lexer = Lexer::new(r#"let tên_tui = 'Huy'"#);
+        let actual = lexer.collect::<Vec<Token>>();
+        assert!(actual == vec![
+            Token::Let,
+            Token::Identifier("tên_tui"),
+            Token::Equal,
+            Token::String("'Huy'")
+        ])
+    }
 }
